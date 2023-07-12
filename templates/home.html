@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Designer</title>
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse;
+        }
+
+        #messages {
+            width: 48%;
+            order: 2;
+        }
+
+        .message {
+            display: flex;
+            border: 1px solid #000;
+            margin-bottom: 3px;
+        }
+
+        .message .folded p {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        margin-right: 50px;
+        }
+
+        .message p {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        }
+
+        .message .folded {
+            background-color: #ddd;
+
+            margin-bottom: 3px;
+        }
+
+        .folded {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #placeholders {
+            width: 48%;
+            padding: 10px;
+            border-left: 1px solid #000;
+        }
+
+
+        #content {
+            min-height: 50em;
+            width: 100%;
+        }
+
+        form > * {
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body>
+    <form id="input-form" method="POST">
+        <div id="main-content">
+            <div id="messages">
+                {% for message in messages %}
+                    <div class="message" onclick="toggleFold(this, event)">
+                        <div class="folded">
+                            {% if message.role == 'function' %}
+                                <p><strong>f</strong>: {{ message.name }} - {{ message.content[:80] }}...</p>
+                            {% else %}
+                                <p><strong>{{ message.role[0] }}</strong>: {{ message.content[:80] }}...</p>
+                            {% endif %}
+                            <div>
+                                <input type="hidden" name="message_{{ message.id }}" value="{{ message.content }}">
+                            </div>
+                        </div>
+                        <p class="unfolded" style="display: none;"><strong>{{ message.role }}</strong>: {{ message.content|replace('\n', '<br/>')|safe }}</p>
+                        <div><a href="{{ url_for('delete', id=message.id) }}">Delete</a><input type="checkbox" name="include_{{ message.id }}" checked></div>
+
+
+                    </div>
+                {% endfor %}
+                <div>
+                    <label for="role">Role:</label><br>
+                    <select name="role">
+                        <option value="user">User</option>
+                        <option value="system">System</option>
+                        <option value="assistant">Assistant</option>
+                        <option value="function">Function</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="name">Name (Only for Function Role):</label><br>
+                    <input type="text" name="name">
+                </div>
+                <div>
+                    <label for="temperature">Temperature:</label><br>
+                    <input type="text" name="temperature" value="0.8">
+                </div>
+                <div style="width: 100%;">
+                    <label for="content">Content:</label><br>
+                    <textarea id="content" name="content"></textarea>
+                </div>
+                <input type="submit" value="Send">
+        </div>
+        <div id="placeholders">
+        {% for item in context %}
+            <div class="message" onclick="toggleFold(this, event)">
+                <div class="folded">
+                    <p><strong>{{ item.title }}</strong>: {{ item.content[:50] }}...</p>
+                    <input type="checkbox" name="include_context_{{ loop.index }}" checked>
+                    <input type="hidden" name="context_{{ loop.index }}" value="{{ item.content }}">
+                </div>
+                <p class="unfolded" style="display: none;"><strong>{{ item.title }}</strong>: {{ item.content|replace('\n', '<br/>')|safe }}</p>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    </form>
+    <script>
+    function toggleFold(element, event) {
+        if (event.target.type == 'checkbox' || event.target.tagName == 'A') {
+            return;
+        }
+
+        let folded = element.getElementsByClassName('folded')[0];
+        let unfolded = element.getElementsByClassName('unfolded')[0];
+
+        if (folded.style.display == 'none') {
+            folded.style.display = 'flex';
+            unfolded.style.display = 'none';
+            element.style.backgroundColor = '#ddd';
+        } else {
+            folded.style.display = 'none';
+            unfolded.style.display = 'block';
+            element.style.backgroundColor = '#fff';
+        }
+    }
+    </script>
+</body>
+</html>

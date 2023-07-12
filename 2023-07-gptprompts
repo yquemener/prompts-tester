@@ -1,0 +1,198 @@
+The goal is to make a web tool that helps a user design prompts to send to openAI's API. 
+
+The tool will be in flask and will use sqlite as a local database.
+
+The user must be able to edit the prompt that will be sent to the API. 
+
+A prompt consists of a series of messages. Each message is a dict containing the keys "role" and "content". "role" can be either "system", "user", "assistant" or "function". "content" is a string.
+When "role" is set to "function", there is an additional field in the dictionary: "name" which contains a function name. In that case, "content" contains a JSON dictionary that lists the parameter values for a function call.
+Each message needs to be foldable. Folded, it should only show a bold "s", "u", "a" or "f" depending on the value of "role", the content of "name" if the role is "function" and the beginning of "content".
+Unfolded, the role should be presented as a dropdown list where the user can select a different role. Content should be an input fields where the user can edit the text and "name" should be an editable text field.
+At the bottom, a "send" button will send a request to generate a chat GPT answer and upon reception to add its answer to the bottom of the list.
+Next to the "send" button, a field allowing to change the temperature parameter. Default is 0.8.
+
+On the right, a list of buttons that allow to insert specific text at the cursor position in the active "content" being edited. For now, place 3 placeholder buttons inserting the test "Apple", "banana" and a poem about springtime on the beach.
+
+
+------------
+
+Good.
+
+I now want the placeholders buttons to appear on the right of the page as a column.
+The individual messages should have a "delete" button next to them that allows to remove them from the DB.
+The individual messages should have a checkbox next to them (checked by default) that indicates if they should be included in the prompt or not.
+The messages should have a one-pixel border and a slightly darker background when folded.
+
+
+---------
+
+Good.
+
+The messages do not unfold anymore. The placeholder buttons are still not to the right of the screen.
+When folded, the checkbox and the delete link should be on the same line as the content.
+No need to add a message to the checkbox.
+The Name and Temperature field should be above the content box.
+The send button should be below it.
+
+---------
+
+Good.
+
+The role, mame and temperature fields should be on the same line (still above the content textarea)
+The content textarea should be even bigger and allows to view at least 50 lines of text
+The list of messages should be on the top of the page.
+The textarea for content should be bigger and take up most of the space
+
+
+-----------
+
+Good.
+
+The messages content must display the \n correctly.
+The buttons ended up on the left, they need to be to the right.
+
+No need to regenerate the whole file, just tell me what to change.
+
+
+------------
+
+Here is how the template looks like now:
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Designer</title>
+    <style>
+        #main-content {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse;
+        }
+
+        #messages {
+            width: 75%;
+            order: 2;
+        }
+
+        .message {
+            border: 1px solid #000;
+            margin-bottom: 3px;
+        }
+
+        .message .folded p {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        }
+
+        .message p {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        }
+
+        .message .folded {
+            background-color: #ddd;
+
+            margin-bottom: 3px;
+        }
+
+        .folded {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #placeholders {
+            width: 20%;
+            padding: 10px;
+            border-left: 1px solid #000;
+        }
+
+
+        #content {
+            min-height: 50em;
+            width: 100%;
+        }
+
+        form > * {
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body>
+    <form id="input-form" method="POST">
+        <div id="main-content">
+            <div id="messages">
+                {% for message in messages %}
+                    <div class="message" onclick="toggleFold(this, event)">
+                        <div class="folded">
+                            {% if message.role == 'function' %}
+                                <p><strong>f</strong>: {{ message.name }} - {{ message.content[:80] }}...</p>
+                            {% else %}
+                                <p><strong>{{ message.role[0] }}</strong>: {{ message.content[:80] }}...</p>
+                            {% endif %}
+                            <div>
+                                <input type="checkbox" name="include_{{ message.id }}" checked>
+                                <input type="hidden" name="message_{{ message.id }}" value="{{ message.content }}">
+                                <a href="{{ url_for('delete', id=message.id) }}">Delete</a>
+                            </div>
+                        </div>
+                        <p class="unfolded" style="display: none;"><strong>{{ message.role }}</strong>: {{ message.content|replace('\n', '<br/>')|safe }}</p>
+                    </div>
+                {% endfor %}
+                <div>
+                    <label for="role">Role:</label><br>
+                    <select name="role">
+                        <option value="user">User</option>
+                        <option value="system">System</option>
+                        <option value="assistant">Assistant</option>
+                        <option value="function">Function</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="name">Name (Only for Function Role):</label><br>
+                    <input type="text" name="name">
+                </div>
+                <div>
+                    <label for="temperature">Temperature:</label><br>
+                    <input type="text" name="temperature" value="0.8">
+                </div>
+                <div style="width: 100%;">
+                    <label for="content">Content:</label><br>
+                    <textarea id="content" name="content"></textarea>
+                </div>
+                <input type="submit" value="Send">
+        </div>
+        <div id="placeholders">
+            <button onclick="document.getElementById('content').value += 'Apple'">Apple</button><br>
+            <button onclick="document.getElementById('content').value += 'Banana'">Banana</button><br>
+            <button onclick="document.getElementById('content').value += 'Springtime at the beach is lovely.'">Springtime Poem</button>
+        </div>
+    </div>
+    </form>
+    <script>
+    function toggleFold(element, event) {
+        if (event.target.type == 'checkbox' || event.target.tagName == 'A') {
+            return;
+        }
+
+        let folded = element.getElementsByClassName('folded')[0];
+        let unfolded = element.getElementsByClassName('unfolded')[0];
+
+        if (folded.style.display == 'none') {
+            folded.style.display = 'flex';
+            unfolded.style.display = 'none';
+            element.style.backgroundColor = '#ddd';
+        } else {
+            folded.style.display = 'none';
+            unfolded.style.display = 'block';
+            element.style.backgroundColor = '#fff';
+        }
+    }
+    </script>
+</body>
+</html>
+
+
+I would like to change the three placeholder buttons on the right (named Apple Banana and Springtime at the beach) and replace them by a series of fodlable divs similar to the ones used by the message history, with a checkbox as well but without a "Delete" button.
+
+They are described by the template argument "context" that is a list of dictionnaries. Each item will have a "title" field that is displayed in bold and a "content" field that should be shown (with newlines appearing correctly) when unfolded but should only show the first 50 characters when folded.
