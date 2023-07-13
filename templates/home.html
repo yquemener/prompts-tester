@@ -67,16 +67,19 @@
                     <div class="message" onclick="toggleFold(this, event)">
                         <div class="folded">
                             {% if message.role == 'function' %}
-                                <p><strong>f</strong>: {{ message.name }} - {{ message.content[:80] }}...</p>
+                                <p><strong>f</strong>: {{ message.name }} - {{ message.content[:50] }}...</p>
                             {% else %}
-                                <p><strong>{{ message.role[0] }}</strong>: {{ message.content[:80] }}...</p>
+                                <p><strong>{{ message.role[0] }}</strong>: {{ message.content[:50] }}...</p>
                             {% endif %}
                             <div>
                                 <input type="hidden" name="message_{{ message.id }}" value="{{ message.content }}">
                             </div>
                         </div>
-                        <p class="unfolded" style="display: none;"><strong>{{ message.role }}</strong>: {{ message.content|replace('\n', '<br/>')|safe }}</p>
-                        <div><a href="{{ url_for('delete', id=message.id) }}">Delete</a><input type="checkbox" name="include_{{ message.id }}" checked></div>
+                        <p class="unfolded" style="display: none;"><strong>{{ message.role }}</strong>: {{ message.content|replace('<', '&#60;')|replace('\n', '<br/>')|safe }}</p>
+                        <div style="margin-left: auto;margin-right: 0;">
+                            <a href="{{ url_for('delete', id=message.id) }}">Delete</a>
+                            <input type="checkbox" name="include_{{ message.id }}" checked>
+                        </div>
 
 
                     </div>
@@ -109,10 +112,12 @@
             <div class="message" onclick="toggleFold(this, event)">
                 <div class="folded">
                     <p><strong>{{ item.title }}</strong>: {{ item.content[:50] }}...</p>
-                    <input type="checkbox" name="include_context_{{ loop.index }}" checked>
                     <input type="hidden" name="context_{{ loop.index }}" value="{{ item.content }}">
                 </div>
                 <p class="unfolded" style="display: none;"><strong>{{ item.title }}</strong>: {{ item.content|replace('\n', '<br/>')|safe }}</p>
+                <div style="margin-left: auto;margin-right: 0;">
+                    <input type="checkbox" name="include_context_{{ loop.index }}" checked>
+                </div>
             </div>
         {% endfor %}
         </div>

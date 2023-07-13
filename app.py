@@ -51,13 +51,15 @@ def home():
         temperature = float(request.form.get('temperature'))
         content = request.form.get('content')
 
+        messages_to_send = []
         if content != "":
             message = Message(role=role, name=name, content=content)
             db.session.add(message)
             db.session.commit()
+            db.session.flush()
+            messages_to_send.append(message)
 
         # Get selected messages
-        messages_to_send = []
         for message in Message.query.all():
             if request.form.get(f'include_{message.id}'):
                 messages_to_send.append(message)
@@ -68,11 +70,32 @@ def home():
             openai_messages.append(dict())
             openai_messages[-1]['role'] = message.role
             openai_messages[-1]['content'] = message.content
-            if message.function_call:
+            if message.function_call and message.function_call != "null":
                 openai_messages[-1]['function_call'] = json.loads(message.function_call)
-            if message.name:
-                openai_messages[-1]['name'] = message.name:wq
+            if message.name and message.name !="null":
+                openai_messages[-1]['name'] = message.name
 
+        # Clean up HTML content when applicable
+        update_index = -1
+        for i,om in enumerate(openai_messages):
+            if "function_call" in om.keys() and om["function_call"]:
+                if om["function_call"]["name"]=="search_status_update":
+                    update_index = i
+        last_content_index = -1
+        for i,om in enumerate(openai_messages):
+            if om["role"] == "function":
+                if om["name"] == "get_url_page":
+                    last_content_index = i
+        if update_index>-1:
+            for i, om in enumerate(openai_messages):
+                if om["role"] == "function":
+                    if om["name"] == "get_url_page" and i != last_content_index:
+                        try:
+                            d = json.loads(om['content'])
+                            d["page_content"]="..."
+                            om['content'] = json.dumps(d)
+                        except Exception:
+                            om['content'] = '...'
 
         print("*" * 80)
         for m in openai_messages:
@@ -124,8 +147,11 @@ def home():
                 message.content = f"function call: {message.function_call['name']}\n"
                 message.content += f"arguments:\n"
                 print(message.function_call.get("arguments", {}))
-                for k,v in json.loads(message.function_call.get("arguments", {})).items():
-                    message.content += f" * {k}: {repr(v)}"
+                try:
+                    for k,v in json.loads(message.function_call.get("arguments", {})).items():
+                        message.content += f" * {k}: {repr(v)}"
+                except json.decoder.JSONDecodeError:
+                    message.content += str(message.function_call.get("arguments"))
             else:
                 message.content = ""
         print("*", message.content)
