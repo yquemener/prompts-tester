@@ -16,4 +16,4 @@ except FileNotFoundError:
     openai.api_key = open("/app/keys/openAIAPI", "r").read().rstrip("\n")
     HTTP_PASSWORD = open("/app/keys/MindMakerHttpPassword", "r").read().rstrip("\n")
     HOSTNAME = "http://agent.iv-labs.org"
-    PLAYGROUND_URL = "http://agent.iv-labs.org:5481"
+    PLAYGROUND_URL = "http://playground.iv-labs.org"
