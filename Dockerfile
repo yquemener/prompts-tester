@@ -5,6 +5,9 @@ FROM python:3.9-slim-buster
 # to the terminal with out buffering it first
 ENV PYTHONUNBUFFERED 1
 
+RUN apt update
+RUN apt install net-tools
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --upgrade pip
 RUN pip install flask
