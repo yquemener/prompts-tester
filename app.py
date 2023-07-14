@@ -178,11 +178,15 @@ def home():
 
         # Add the assistant's response to the database
         print(response)
+        # Fixing weirg OpenAI bug
+        args = response['choices'][0]['message'].get("arguments")
+        if args and args.endswith(",\n}"):
+            args = args[-3:]+"}"
         assistant_message = Message(
             role='assistant',
             content=response['choices'][0]['message']['content'],
             function_call=json.dumps(response['choices'][0]['message'].get("function_call")),
-            arguments=json.dumps(response['choices'][0]['message'].get("arguments")),
+            arguments=json.dumps(args),
         )
         db.session.add(assistant_message)
         db.session.commit()
@@ -190,7 +194,11 @@ def home():
         response_message = response['choices'][0]['message']
         if response_message.get("function_call"):
             function_name = response_message["function_call"]["name"]
-            function_args = json.loads(response_message["function_call"]["arguments"])
+            args = response['choices'][0]['message']["function_call"].get("arguments")
+            # Fixing weird OpenAI bug
+            if args and args.endswith(",\n}"):
+                args = args[:-3] + '}'
+            function_args = json.loads(args)
             function_answer = documented_functions[function_name][0](**function_args)
             print(function_name)
             print(function_args)

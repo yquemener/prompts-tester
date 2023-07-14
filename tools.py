@@ -183,14 +183,14 @@ def flask_creation_py(python_code):
         return f"{type(e).__name__}: {e}"
 flask_creation_py.openai_desc = {
     "name": "flask_creation_py",
-    "description": f"Creates a app.py python file run it as a flask application. The application can access the local sqlite database named playground.db. Remember that JSON does not support multilines string. All line returns must be escaped.",
+    "description": f"Creates a app.py python file and run it as a flask application. The application can access the local sqlite database named playground.db.",
     "parameters": {
         "type": "object",
         "properties": {
             "python_code": {
                 "type": "string",
-                "description": "content of the python file to write as app.py."
-            },
+                "description": "Content of the python file to write as app.py."
+            }
         },
         "required": ["python_code"]
     }
