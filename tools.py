@@ -190,7 +190,7 @@ def flask_creation_py(python_code):
         if flask_process:
             os.kill(flask_process.pid, signal.SIGKILL)
             flask_process.wait(10)
-        flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--debug', '-p', '5481'], cwd="playground/")
+        flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '-p', '5481'], cwd="playground/")
         return "OK"
     except Exception as e:
         return f"{type(e).__name__}: {e}"
