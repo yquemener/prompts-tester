@@ -14,7 +14,7 @@ RUN pip install tiktoken
 RUN pip install watchdog
 RUN pip install Flask-HTTPAuth
 RUN pip install Flask-SQLAlchemy
-RUN pip install beautifulsoup4, html2text, soupsieve
+RUN pip install beautifulsoup4 html2text soupsieve
 
 # Create root directory for our project in the container
 RUN mkdir /app
