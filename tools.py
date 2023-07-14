@@ -9,6 +9,8 @@ import html2text
 import sys
 import subprocess
 import tiktoken
+import os
+import signal
 
 encoder = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
@@ -173,11 +175,17 @@ sql_request.openai_desc = {
     }
 }
 
+flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--debug', '-p', '5481'], cwd="playground/")
 def flask_creation_py(python_code):
+    global flask_process
     try:
         f = open("playground/app.py", "w")
         f.write(python_code)
         f.close()
+
+        if flask_process:
+            os.kill(flask_process.pid, signal.SIGTERM)
+        flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--debug', '-p', '5481'], cwd="playground/")
         return "OK"
     except Exception as e:
         return f"{type(e).__name__}: {e}"
