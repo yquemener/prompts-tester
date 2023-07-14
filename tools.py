@@ -179,7 +179,7 @@ sql_request.openai_desc = {
 env = os.environ.copy()
 env['FLASK_APP'] = 'app.py'
 env['FLASK_ENV'] = 'development'
-flask_process = subprocess.Popen(['flask', '--host', '0.0.0.0', '--app', 'app', 'run', '-p', '5481'], cwd="playground/", env=env)
+flask_process = subprocess.Popen(['flask', '--host=0.0.0.0', '--app', 'app', 'run', '-p', '5481'], cwd="playground/", env=env)
 def flask_creation_py(python_code):
     global flask_process
     try:
