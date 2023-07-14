@@ -85,21 +85,15 @@
                     </div>
                 {% endfor %}
                 <div>
-                    <label for="role">Role:</label><br>
-                    <select name="role">
-                        <option value="user">User</option>
-                        <option value="system">System</option>
-                        <option value="assistant">Assistant</option>
-                        <option value="function">Function</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="name">Name (Only for Function Role):</label><br>
-                    <input type="text" name="name">
-                </div>
-                <div>
-                    <label for="temperature">Temperature:</label><br>
-                    <input type="text" name="temperature" value="0.8">
+                        <label for="role">Role:</label>
+                        <select name="role">
+                            <option value="user">User</option>
+                            <option value="system">System</option>
+                            <option value="assistant">Assistant</option>
+                            <option value="function">Function</option>
+                        </select>
+                        <label for="temperature">Temperature:</label>
+                        <input type="text" name="temperature" value="0.8" size="4">
                 </div>
                 <div style="width: 100%;">
                     <label for="content">Content:</label><br>
@@ -108,6 +102,9 @@
                 <input type="submit" value="Send">
         </div>
         <div id="placeholders">
+            <div><a href="/playground/">Playground DB</a></div>
+            <div><a href={{playground_url}}>Playground Web</a></div>
+            <br>
         {% for item in context %}
             <div class="message" onclick="toggleFold(this, event)">
                 <div class="folded">

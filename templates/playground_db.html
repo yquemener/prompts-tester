@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contenu des tables</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<a href="/">Retour</a>
+<body>
+<button onclick="reset()">Reset</button>
+  {% for table_name, rows in table_data.items() %}
+    <h1>{{ table_name }}</h1>
+    {% if rows %}
+      <table>
+        <tr>
+          {% for column in rows[0].keys() %}
+            <th>{{ column }}</th>
+          {% endfor %}
+        </tr>
+        {% for row in rows %}
+          <tr>
+            {% for value in row.values() %}
+              <td>{{ value }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>Aucune donnée disponible pour cette table.</p>
+    {% endif %}
+  {% endfor %}
+    <script>
+      function reset() {
+        fetch('/playground/reset', { method: 'POST' })
+          .then(response => {
+            if (response.ok) {
+              location.reload();
+            } else {
+              console.error('Failed to reset conversation context.');
+            }
+          })
+          .catch(error => {
+            console.error('An error occurred:', error);
+          });
+      }
+    </script>
+</body>
+</html>

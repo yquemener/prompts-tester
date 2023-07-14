@@ -1,14 +1,40 @@
 import json
+import sqlite3
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, make_response
 from flask_sqlalchemy import SQLAlchemy
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 import openai
+import configuration as C
+
+
+# TODO: Barre de progression "budget tokens"
+# TODO: Checkbox à coté des fonctions qui marchent vraiment
+# TODO: Arriver à afficher le python/HTML avec les retours à la ligne
+# TODO: Statut dynamique ne rechargeant pas la page à chaque fois
+# TODO: "Run for X thoughts"
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///messages.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-openai.api_key = open("/home/yves/keys/openAIAPI", "r").read().rstrip("\n")
+# openai.api_key = open("/home/yves/keys/openAIAPI", "r").read().rstrip("\n")
+auth = HTTPBasicAuth()
+
+users = {
+    "user": generate_password_hash(C.HTTP_PASSWORD)
+}
+
+@app.before_request
+def require_auth():
+    auth.login_required()
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and \
+            check_password_hash(users.get(username), password):
+        return username
 
 
 # Extract tools information
@@ -36,7 +62,47 @@ class Message(db.Model):
         return '<Message %r>' % self.id
 
 
+# Does a SQL request, returns result if any
+def db_req(dbname, req, args=None, row_factory=False):
+    if args is None:
+        args = []
+    conn = sqlite3.connect(dbname)
+    if row_factory:
+        conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    res = cursor.execute(req, args)
+    if res:
+        res = res.fetchall()
+    conn.commit()
+    conn.close()
+    return res
+
+
+@app.route("/playground/")
+@auth.login_required
+def playground():
+    tables = db_req(tools.sql_file,
+           "SELECT name FROM sqlite_master WHERE type='table';", row_factory=True)
+    table_data = {}
+    for table in tables:
+        table_name = table['name']
+        rows=db_req(tools.sql_file, f"SELECT * FROM {table_name};", row_factory=True)
+        table_data[table_name] = [dict(row) for row in rows]
+    return render_template('playground_db.html', table_data=table_data)
+
+@app.route("/playground/reset", methods=["POST"])
+@auth.login_required
+def playground_reset():
+    tables = db_req(tools.sql_file, f"SELECT name FROM sqlite_master WHERE type='table';")
+    for table in tables:
+        if table[0].startswith("sqlite_"):
+            continue
+        table_name = table[0]
+        db_req(tools.sql_file, f"DROP TABLE IF EXISTS {table_name};")
+    return make_response("", 200)
+
 @app.route("/delete/<int:id>")
+@auth.login_required
 def delete(id):
     message = Message.query.get_or_404(id)
     db.session.delete(message)
@@ -44,6 +110,7 @@ def delete(id):
     return redirect(url_for('home'))
 
 @app.route('/', methods=['GET', 'POST'])
+@auth.login_required
 def home():
     if request.method == 'POST':
         role = request.form.get('role')
@@ -159,7 +226,8 @@ def home():
     print(openai_functions_arg)
     return render_template('home.html',
                            messages=messages,
-                           context=[{"title": i['name'], "content": i['description']} for i in openai_functions_arg])
+                           context=[{"title": i['name'], "content": i['description']} for i in openai_functions_arg],
+                           playground_url=C.PLAYGROUND_URL)
 
 if __name__ == "__main__":
     with app.app_context():
