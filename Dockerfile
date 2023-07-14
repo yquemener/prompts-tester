@@ -27,5 +27,5 @@ WORKDIR /app
 COPY . /app/
 
 # Start up Nginx server
-CMD ["python", "app.py"]
+CMD ["bash", "go.sh"]
 
