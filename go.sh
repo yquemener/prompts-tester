@@ -1,4 +1,3 @@
 #!/bin/bash
 
-(cd playground; ./go.sh &)
-python app.py
+python main.py

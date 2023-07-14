@@ -175,7 +175,11 @@ sql_request.openai_desc = {
     }
 }
 
-flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--debug', '-p', '5481'], cwd="playground/")
+
+env = os.environ.copy()
+env['FLASK_APP'] = 'app.py'
+env['FLASK_ENV'] = 'development'
+flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '-p', '5481'], cwd="playground/", env=env)
 def flask_creation_py(python_code):
     global flask_process
     try:
@@ -184,20 +188,21 @@ def flask_creation_py(python_code):
         f.close()
 
         if flask_process:
-            os.kill(flask_process.pid, signal.SIGTERM)
+            os.kill(flask_process.pid, signal.SIGKILL)
+            flask_process.wait(10)
         flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--debug', '-p', '5481'], cwd="playground/")
         return "OK"
     except Exception as e:
         return f"{type(e).__name__}: {e}"
 flask_creation_py.openai_desc = {
     "name": "flask_creation_py",
-    "description": f"Creates a app.py python file and run it as a flask application. The application can access the local sqlite database named playground.db.",
+    "description": f"Creates a main.py python file and run it as a flask application. The application can access the local sqlite database named playground.db.",
     "parameters": {
         "type": "object",
         "properties": {
             "python_code": {
                 "type": "string",
-                "description": "Content of the python file to write as app.py."
+                "description": "Content of the python file to write as main.py."
             }
         },
         "required": ["python_code"]
