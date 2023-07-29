@@ -1,0 +1,24 @@
+Make a flask app that implements a basic dungeon crawler and populate it with rooms, monsters and treasures.
+
+The app should propose the user to go N S E W, state the room they are in, the monsters to fight, the treasures to get.
+
+It should have a combat system, display the user's life points and describe the current room.
+
+The data for the game can be stored in a sqlite database.
+
+
+---
+Remember that you can only send one SQL request at the time.
+
+---
+Regenerate the python file
+
+---
+Nice, but I don't see any buttons to do any actions (go N S E W, fight monster, pick up treasure). I also don't see my health points
+
+
+---
+The buttons don't trigger any action. Update the python file.
+
+---
+Implement the actions. Store the current position of the user in the database.

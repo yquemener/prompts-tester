@@ -1,0 +1,1 @@
+Create a flask app that just serves a web page saying "Hello world" in a big font in the middle of the screen. Use a cute pastel palette.

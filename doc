@@ -1,0 +1,17 @@
+Hello, nouvelle version du prompt tester en ligne, enfin!
+
+Comment il s'utilise? Alors la limitation principale pour l'instant, c'est que tout le monde voit la même chose, y a une seule instance. 
+
+Il est fort à générer des applications flask (des sites web dynamiques en python) donc il vaut mieux lui demander ça. Une fois la requête faite, vous appuyes sur "send", et le refaite jusqu'à ce qu'il semble avoir fini (il lui faudra généralement une requête pour générer le code python, une autre pour le html et potentiellement plusieurs pour les requetes SQL)
+
+Si vous avez des "internal errors
+
+
+-----------
+
+Create a flask app that just serves a web page saying "Hello world" in a big font in the middle of the screen. Use a cute pastel palette.
+
+-----------
+
+
+Make a list of famous French classic authors and their most famous work and insert it into an "author" table in the DB. Make a flask dashboard that displays that information.

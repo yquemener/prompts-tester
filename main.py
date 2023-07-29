@@ -19,10 +19,12 @@ from time import sleep
 # TODO: Arriver à afficher le python/HTML avec les retours à la ligne
 # TODO: Statut dynamique ne rechargeant pas la page à chaque fois
 # TODO: "Run for X thoughts"
+# TODO: Debug de temps en temps le dernier commentaire user est ignoré
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///messages.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+os.environ["FLASK_ENV"] = "development"
 db = SQLAlchemy(app)
 # openai.api_key = open("/home/yves/keys/openAIAPI", "r").read().rstrip("\n")
 auth = HTTPBasicAuth()
@@ -151,7 +153,9 @@ def delete_all():
 def start_app_playground():
     global playground_process
     if playground_process is None or playground_process.poll() is not None:
-        playground_process = subprocess.Popen(["python3.9", "-m", 'gunicorn', '-w', '2', '-b', '0.0.0.0:5481', 'app:app'], cwd='./playground/')
+        playground_process = subprocess.Popen(["python3.9", "-m", 'gunicorn', '-w', '2', '-b', '0.0.0.0:5481', 'app:app'],
+                                              cwd='./playground/',
+                                              env=dict(os.environ, FLASK_ENV="development"))
     return jsonify(success=True)
 
 @app.route('/playground_stop', methods=['POST'])
