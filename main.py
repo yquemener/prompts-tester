@@ -164,14 +164,40 @@ def start_app_playground():
 @auth.login_required
 def stop_app_playground():
     global playground_process
+
+    # Get the process ID that occupies the port
+    proc = subprocess.Popen(['lsof', '-t', '-i:5481'], stdout=subprocess.PIPE)
+    out, err = proc.communicate()
+    pids = out.decode().strip().split("\n")
+
+    # If a process is running on the port, kill it
+    if pids:
+        for pid in pids:
+            print(pid)
+            # os.kill(int(pid), signal.SIGKILL)
+
+    # Then, stop app_B
     if playground_process is not None:
         os.kill(playground_process.pid, signal.SIGTERM)
+
     return jsonify(success=True)
+
 
 @app.route('/playground_restart', methods=['POST'])
 @auth.login_required
 def restart_app_playground():
     global playground_process
+
+    # Get the process ID that occupies the port
+    proc = subprocess.Popen(['lsof', '-t', '-i:5481'], stdout=subprocess.PIPE)
+    out, err = proc.communicate()
+    pid = out.decode().strip()
+
+    # If a process is running on the port, kill it
+    if pid:
+        os.kill(int(pid), signal.SIGKILL)
+
+    # Then, restart app_B
     if playground_process is not None and playground_process.poll() is None:
         playground_process.terminate()
         playground_process.wait()

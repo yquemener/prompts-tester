@@ -179,6 +179,15 @@ sql_request.openai_desc = {
 def flask_creation_py(python_code):
     try:
         f = open("playground/app.py", "w")
+
+        python_code = python_code.replace("@app.route('/')",
+                            """import traceback
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return f"<pre>Error: {str(e)}\\n\\n {traceback.format_exc()}</pre>"
+@app.route('/')""")
+
         f.write(python_code)
         f.close()
         return "OK"
