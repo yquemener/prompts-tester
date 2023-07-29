@@ -4,10 +4,14 @@ Comment il s'utilise? Alors la limitation principale pour l'instant, c'est que t
 
 Il est fort à générer des applications flask (des sites web dynamiques en python) donc il vaut mieux lui demander ça. Une fois la requête faite, vous appuyes sur "send", et le refaite jusqu'à ce qu'il semble avoir fini (il lui faudra généralement une requête pour générer le code python, une autre pour le html et potentiellement plusieurs pour les requetes SQL)
 
-Si vous avez des "500 internal error", vous pouvez faire "back" et effacer la dernière réponse. Il lui arrive encore de générer des réponses au format invalide, mais c'est devenu plus rare.
+Si vous avez des "500 internal error" ou une JSONDecodeError, vous pouvez faire "back" et effacer la dernière réponse. Il lui arrive encore de générer des réponses au format invalide, mais c'est devenu plus rare.
+
+S'il appelle une fonction et que cette fonction retourne une erreur, vous pouvez insister un peu, (refaire send) parfois il arrive à les résoudre tout seul.
+
+Une fois votre appli générée, cliquez sur "start" à droite et sur le lien Playground Web.
 
 
-
+Quelques exemples que j'ai testé:
 
 -----------
 
@@ -17,3 +21,12 @@ Create a flask app that just serves a web page saying "Hello world" in a big fon
 
 
 Make a list of famous French classic authors and their most famous work and insert it into an "author" table in the DB. Make a flask dashboard that displays that information.
+
+
+--------
+
+Nous devons régulièrement commander des bobines de filaments pour notre imprimante 3D, il en existe trois types: PETG, ABS et PLA chacun dans 2 couleurs: noir et orange. Crée une base de données et un formulaire permettant à chacun d'ajouter une commande. Affiche également le nombre total de bobines à commander.
+
+La base de données se nomme playground.db
+
+Ajoute une page pour voir le total des commandes de chaque type à faire.
