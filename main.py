@@ -175,7 +175,7 @@ def restart_app_playground():
 @app.route('/playground_status')
 def status():
     status = is_playground_running()
-    port_occupied = is_port_occupied(5001)
+    port_occupied = is_port_occupied(5481)
     return jsonify(running=status, port_occupied=port_occupied)
 
 
