@@ -4,7 +4,9 @@ Comment il s'utilise? Alors la limitation principale pour l'instant, c'est que t
 
 Il est fort à générer des applications flask (des sites web dynamiques en python) donc il vaut mieux lui demander ça. Une fois la requête faite, vous appuyes sur "send", et le refaite jusqu'à ce qu'il semble avoir fini (il lui faudra généralement une requête pour générer le code python, une autre pour le html et potentiellement plusieurs pour les requetes SQL)
 
-Si vous avez des "internal errors
+Si vous avez des "500 internal error", vous pouvez faire "back" et effacer la dernière réponse. Il lui arrive encore de générer des réponses au format invalide, mais c'est devenu plus rare.
+
+
 
 
 -----------

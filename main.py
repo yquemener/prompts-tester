@@ -25,6 +25,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///messages.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 os.environ["FLASK_ENV"] = "development"
+app.debug = True
 db = SQLAlchemy(app)
 # openai.api_key = open("/home/yves/keys/openAIAPI", "r").read().rstrip("\n")
 auth = HTTPBasicAuth()
@@ -139,6 +140,7 @@ def delete(id):
 @app.route("/delete_all/")
 @auth.login_required
 def delete_all():
+    raise NotImplementedError
     try:
         db.session.query(Message).delete()
         db.session.commit()
@@ -153,9 +155,9 @@ def delete_all():
 def start_app_playground():
     global playground_process
     if playground_process is None or playground_process.poll() is not None:
-        playground_process = subprocess.Popen(["python3.9", "-m", 'gunicorn', '-w', '2', '-b', '0.0.0.0:5481', 'app:app'],
-                                              cwd='./playground/',
-                                              env=dict(os.environ, FLASK_ENV="development"))
+        playground_process = subprocess.Popen(
+            ["python", "-m", "gunicorn", "--log-level", "debug", "--reload", "-b", ":5481", "app:app"],
+            cwd='./playground/')
     return jsonify(success=True)
 
 @app.route('/playground_stop', methods=['POST'])
@@ -313,5 +315,5 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000)
     sleep(5)

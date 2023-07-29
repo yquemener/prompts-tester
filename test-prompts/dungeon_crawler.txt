@@ -1,10 +1,10 @@
 Make a flask app that implements a basic dungeon crawler and populate it with rooms, monsters and treasures.
 
-The app should propose the user to go N S E W, state the room they are in, the monsters to fight, the treasures to get.
+The app should propose buttons to go N S E W. It should describe the room the player is in, and what it sees, treasures and monsters.
 
 It should have a combat system, display the user's life points and describe the current room.
 
-The data for the game can be stored in a sqlite database.
+The data for the game can be stored in a sqlite database. The DB is named playground.db.
 
 
 ---
