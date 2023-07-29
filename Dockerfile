@@ -5,30 +5,19 @@ FROM python:3.9-slim-buster
 # to the terminal with out buffering it first
 ENV PYTHONUNBUFFERED 1
 
-RUN apt update
-RUN apt install net-tools
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --upgrade pip
-RUN pip install flask
-RUN pip install matrix_client
-RUN pip install openai
-RUN pip install tiktoken
-RUN pip install watchdog
-RUN pip install Flask-HTTPAuth
-RUN pip install Flask-SQLAlchemy
-RUN pip install beautifulsoup4 html2text soupsieve
-
-# Create root directory for our project in the container
 RUN mkdir /app
 RUN mkdir /app/data
-
-# Set the working directory in the container
 WORKDIR /app
+COPY requirements.txt /app/requirements.txt
 
-# Copy the current directory contents into the container at /app
-COPY . /app/
+RUN apt update
+RUN apt install -y net-tools
+RUN pip install --upgrade pip
+RUN pip install flask gunicorn matrix_client openai tiktoken watchdog Flask-HTTPAuth Flask-SQLAlchemy beautifulsoup4 html2text soupsieve
+RUN pip install -r requirements.txt
 
-# Start up Nginx server
+COPY . /app
+
+
 CMD ["python", "main.py"]
 

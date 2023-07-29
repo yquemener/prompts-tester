@@ -80,10 +80,9 @@
                             <a href="{{ url_for('delete', id=message.id) }}">Delete</a>
                             <input type="checkbox" name="include_{{ message.id }}" checked>
                         </div>
-
-
                     </div>
                 {% endfor %}
+                <a href="{{ url_for('delete_all') }}">Delete All</a>
                 <div>
                         <label for="role">Role:</label>
                         <select name="role">
@@ -102,6 +101,13 @@
                 <input type="submit" value="Send">
         </div>
         <div id="placeholders">
+            <h1>Playground server status</h1>
+            <p id="running-status">Running: Checking...</p>
+            <p id="port-status">Port Occupied: Checking...</p>
+            <button id="start-btn">Start</button>
+            <button id="stop-btn">Stop</button>
+            <button id="restart-btn">Restart</button>
+
             <div><a href="/playground/">Playground DB</a></div>
             <div><a href={{playground_url}}>Playground Web</a></div>
             <br>
@@ -121,6 +127,21 @@
     </div>
     </form>
     <script>
+    setInterval(function() {
+        fetch('/playground_status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('running-status').textContent = 'Running: ' + data.running;
+                document.getElementById('port-status').textContent = 'Port Occupied: ' + data.port_occupied;
+            });
+        }, 1000);
+
+    function sendRequest(action) {
+        fetch('/playground_' + action, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => console.log(data));
+    }
+
     function toggleFold(element, event) {
         if (event.target.type == 'checkbox' || event.target.tagName == 'A') {
             return;
@@ -139,6 +160,21 @@
             element.style.backgroundColor = '#fff';
         }
     }
+
+            document.getElementById('start-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sendRequest('start');
+        });
+
+        document.getElementById('stop-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sendRequest('stop');
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sendRequest('restart');
+        });
     </script>
 </body>
 </html>

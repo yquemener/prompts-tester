@@ -11,7 +11,7 @@ try:
     openai.api_key = open("/home/yves/keys/openAIAPI", "r").read().rstrip("\n")
     HTTP_PASSWORD = open("/home/yves/keys/MindMakerHttpPassword", "r").read().rstrip("\n")
     HOSTNAME = "http://127.0.0.1:8080"
-    PLAYGROUND_URL = "http://127.0.0.1:5481"
+    PLAYGROUND_URL = "http://127.0.0.1:5001"
 except FileNotFoundError:
     openai.api_key = open("/app/keys/openAIAPI", "r").read().rstrip("\n")
     HTTP_PASSWORD = open("/app/keys/MindMakerHttpPassword", "r").read().rstrip("\n")

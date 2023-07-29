@@ -1,0 +1,1 @@
+Make a list of famous French classic authors and their most famous work and insert it into an "author" table in the DB. Make a flask dashboard that displays that information.

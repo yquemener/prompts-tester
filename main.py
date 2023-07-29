@@ -1,8 +1,11 @@
 import json
+import os
+import signal
 import sqlite3
 import subprocess
 
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify
+import logging
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -37,6 +40,26 @@ def verify_password(username, password):
     if username in users and \
             check_password_hash(users.get(username), password):
         return username
+
+
+class IgnoreStatusCheckFilter(logging.Filter):
+    def filter(self, record):
+        return '/playground_status' not in record.getMessage()
+
+logging.getLogger('werkzeug').addFilter(IgnoreStatusCheckFilter())
+
+
+playground_process = None
+
+def is_port_occupied(port):
+    result = subprocess.run(['netstat', '-tuln'], capture_output=True, text=True)
+    return str(port) in result.stdout
+
+def is_playground_running():
+    global playground_process
+    if playground_process is None:
+        return False
+    return playground_process.poll() is None
 
 
 # Extract tools information
@@ -110,6 +133,51 @@ def delete(id):
     db.session.delete(message)
     db.session.commit()
     return redirect(url_for('home'))
+
+@app.route("/delete_all/")
+@auth.login_required
+def delete_all():
+    try:
+        db.session.query(Message).delete()
+        db.session.commit()
+        return redirect(url_for('home'))
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(success=False, message=str(e)), 500
+
+
+@app.route('/playground_start', methods=['POST'])
+@auth.login_required
+def start_app_playground():
+    global playground_process
+    if playground_process is None or playground_process.poll() is not None:
+        playground_process = subprocess.Popen(["python3.9", "-m", 'gunicorn', '-w', '2', '-b', '0.0.0.0:5481', 'app:app'], cwd='./playground/')
+    return jsonify(success=True)
+
+@app.route('/playground_stop', methods=['POST'])
+@auth.login_required
+def stop_app_playground():
+    global playground_process
+    if playground_process is not None:
+        os.kill(playground_process.pid, signal.SIGTERM)
+    return jsonify(success=True)
+
+@app.route('/playground_restart', methods=['POST'])
+@auth.login_required
+def restart_app_playground():
+    global playground_process
+    if playground_process is not None and playground_process.poll() is None:
+        playground_process.terminate()
+        playground_process.wait()
+    start_app_playground()
+    return jsonify(success=True)
+
+@app.route('/playground_status')
+def status():
+    status = is_playground_running()
+    port_occupied = is_port_occupied(5001)
+    return jsonify(running=status, port_occupied=port_occupied)
+
 
 @app.route('/', methods=['GET', 'POST'])
 @auth.login_required
@@ -213,8 +281,6 @@ def home():
             db.session.add(assistant_message)
             db.session.commit()
 
-
-
     messages = Message.query.all()
     for message in messages:
         if message.function_call:
@@ -243,5 +309,5 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    app.run(host='0.0.0.0', port=8080, debug=False)
-    sleep(15)
+    app.run(host='0.0.0.0', port=5000, debug=False)
+    sleep(5)

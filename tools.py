@@ -176,21 +176,11 @@ sql_request.openai_desc = {
 }
 
 
-env = os.environ.copy()
-env['FLASK_APP'] = 'app.py'
-env['FLASK_ENV'] = 'development'
-flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--host=0.0.0.0', '-p', '5481'], cwd="playground/", env=env)
 def flask_creation_py(python_code):
-    global flask_process
     try:
         f = open("playground/app.py", "w")
         f.write(python_code)
         f.close()
-
-        if flask_process:
-            os.kill(flask_process.pid, signal.SIGKILL)
-            flask_process.wait(10)
-        flask_process = subprocess.Popen(['flask', '--app', 'app', 'run', '--host=0.0.0.0', '-p', '5481'], cwd="playground/", env=env)
         return "OK"
     except Exception as e:
         return f"{type(e).__name__}: {e}"
