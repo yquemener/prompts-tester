@@ -140,7 +140,6 @@ def delete(id):
 @app.route("/delete_all/")
 @auth.login_required
 def delete_all():
-    raise NotImplementedError
     try:
         db.session.query(Message).delete()
         db.session.commit()
